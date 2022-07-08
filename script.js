@@ -4,31 +4,42 @@ const messageform = document.getElementById('send-container');
 const messageinput = document.getElementById('message-input');
 
 const name = prompt('What is your name?');
-appendmessage('You joined the chat');
-socket.emit('new-user', name);
+if(name != undefined && name!= null && name.length!=0){
+    socket.emit('new-user', name);
 
-socket.on('chat-message', data =>{
-    appendmessage(`${data.name}: ${data.message}`);
-})
+    socket.on('print-users', userlist => {
+        for(let i=0;i<userlist.length;i++){
+            if(name != userlist[i]){
+                appendmessage(`${userlist[i]} joined`);
+            }
+        }
+    })
 
-socket.on('user-connected', name =>{
-    appendmessage(`${name} joined`);
-})
+    appendmessage('You joined the chat');
 
-socket.on('user-disconnected', name =>{
-    appendmessage(`${name} disconected`);
-})
+    socket.on('chat-message', data =>{
+        appendmessage(`${data.name}: ${data.message}`);
+    })
 
-messageform.addEventListener('submit', e=>{
-    e.preventDefault();
-    const message = messageinput.value;
-    appendmessage(`You: ${message}`);
-    socket.emit('send-chat-message',message);
-    messageinput.value = '';
-})
+    socket.on('user-connected', name =>{
+        appendmessage(`${name} joined`);
+    })
 
-function appendmessage(message){
-    const messageelement = document.createElement('div');
-    messageelement.innerText = message;
-    messageconatiner.append(messageelement);
+    socket.on('user-disconnected', name =>{
+        appendmessage(`${name} disconected`);
+    })
+
+    messageform.addEventListener('submit', e=>{
+        e.preventDefault();
+        const message = messageinput.value;
+        appendmessage(`You: ${message}`);
+        socket.emit('send-chat-message',message);
+        messageinput.value = '';
+    })
+
+    function appendmessage(message){
+        const messageelement = document.createElement('div');
+        messageelement.innerText = message;
+        messageconatiner.append(messageelement);
+    }
 }

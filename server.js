@@ -4,12 +4,14 @@ const io = require('socket.io')(3000,{
         origin: 'http://127.0.0.1:5500',
     },
 });
-
-const users = {};
+const users = [];
+const userlist =[];
 
 io.on('connection', socket => {
     socket.on('new-user', name =>{
         users[socket.id]=name;
+        userlist.push(name);
+        socket.emit('print-users',userlist);
         socket.broadcast.emit('user-connected', name);
     })
     socket.on('send-chat-message', message =>{
@@ -18,7 +20,9 @@ io.on('connection', socket => {
         });
     })
     socket.on('disconnect', ()=>{
-        socket.broadcast.emit('user-disconnected', users[socket.id]);
-        delete users[socket.id];
+        if(users[socket.id]!= null){
+            socket.broadcast.emit('user-disconnected', users[socket.id]);
+            delete users[socket.id];
+        }
     })
 })
