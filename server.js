@@ -42,23 +42,34 @@ server.listen(3000, (req,res)=>{
     console.log('Listening to port 3000....');
 })
 
-var userlist = new Array();
+let userlist = [[]];
 
 io.on('connection', socket => {
     socket.on('new-user', (room,name) =>{
         socket.join(room);
         if(userlist[rooms[room]] == null){
-            userlist[rooms[room]] = new Array();
+            userlist[rooms[room]] = [];
         }
         rooms[room].users[socket.id]=name;
         userlist[rooms[room]].push(name);
+        //console.log(userlist[rooms[room]].length);
+        // let userz = [];
+        // userz = getusers(room);
+        // const userz = room.reduce((users,curruser)=>{
+        //     if(curruser != null){
+        //         users.push(curruser);
+        //     }
+        //     return users;
+        // },[]);
         socket.emit('print-users',userlist[rooms[room]]);
         socket.broadcast.to(room).emit('user-connected', name);
     })
     socket.on('send-chat-message', (room,message) =>{
-        socket.broadcast.to(room).emit('chat-message', {message: message,
-            name: rooms[room].users[socket.id]
-        });
+        if(room !=null && room.length>0 && message!=null && message.length>0){
+            socket.broadcast.to(room).emit('chat-message', {message: message,
+                name: rooms[room].users[socket.id]
+            });
+        }
     })
     socket.on('disconnect', ()=>{
         getUserRooms(socket).forEach(room => {
@@ -78,6 +89,13 @@ function getUserRooms(socket){
         return names;
     },[])
 }
+
+// function getusers(room){
+//     return Object.entries(users).reduce((userzz,[username])=>{
+//         userzz.push(username);
+//         return userzz;
+//     },[])
+// }
 
 //check all rooms and all users.. return all names of
 //rooms that the user is part of

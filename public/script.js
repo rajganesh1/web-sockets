@@ -13,12 +13,12 @@ if(messageform!=null){
             roomElement.innerText = room;
             const roomLink = document.createElement('a');
             roomLink.href = `${room}`;
-            roomLink.innerText = 'join';
+            roomLink.innerText = 'Join';
             roomcontainer.append(roomElement);
             roomcontainer.append(roomLink);
         })
 
-        appendmessage('You joined the chat');
+        appendmessage(`You (${name}) joined the chat `);
         socket.emit('new-user', roomName, name);
     
         socket.on('print-users', userlist => {
@@ -30,7 +30,9 @@ if(messageform!=null){
         })
     
         socket.on('chat-message', data =>{
-            appendmessage(`${data.name}: ${data.message}`);
+            if(data.message.length!=null){
+                appendmessage(`${data.name}: ${data.message}`);
+            }
         })
     
         socket.on('user-connected', name =>{
@@ -44,15 +46,19 @@ if(messageform!=null){
         messageform.addEventListener('submit', e=>{
             e.preventDefault();
             const message = messageinput.value;
-            appendmessage(`You: ${message}`);
-            socket.emit('send-chat-message',roomName, message);
-            messageinput.value = '';
+            if(message!=null && message!=undefined && message.length>0){
+                appendmessage(`You: ${message}`);
+                socket.emit('send-chat-message',roomName, message);
+                messageinput.value = '';
+            }
         })
     
         function appendmessage(message){
-            const messageelement = document.createElement('div');
-            messageelement.innerText = message;
-            messageconatiner.append(messageelement);
+            if(message!=null && message!=undefined){
+                const messageelement = document.createElement('div');
+                messageelement.innerText = message;
+                messageconatiner.append(messageelement);
+            }
         }
     } 
 }
